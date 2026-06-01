@@ -37,7 +37,7 @@
     <h2>⚙️ Sheet Setup</h2>
     <p>Optional: paste a Google Sheet ID to sync across devices. BabyLog will create the tabs and headers it needs.</p>
     <ol class="setup-steps">
-      <li><span class="step-num">1</span><span>Create or open a Google Sheet. Copy the ID from <strong>https://docs.google.com/spreadsheets/d/143MtTdaUKBB-h_tWxBxcJigaeMN-baF3KYQoH1pn8CA/edit?gid=0#gid=0/edit</strong>.</span></li>
+      <li><span class="step-num">1</span><span>Create or open a Google Sheet. Copy the ID from <strong>docs.google.com/spreadsheets/d/THIS_PART/edit</strong>.</span></li>
       <li><span class="step-num">2</span><span>Share the sheet with edit access for every caregiver who will sign in.</span></li>
       <li><span class="step-num">3</span><span>Paste the ID below. If you skip this, local storage still works.</span></li>
     </ol>
@@ -153,7 +153,15 @@ async function saveSheetId() {
   if (!isLikelySheetId(val)) { showToast('That does not look like a Google Sheet ID'); return; }
   sheetId = val; localStorage.setItem(SHEET_ID_KEY, val);
   const btn = document.getElementById('save-sheet-btn'); setButtonBusy(btn, true);
-  try { await initSheet(); clearSyncProblem(); showToast('Sheet ready! ✅'); await showApp(); await syncPendingEvents(); }
+  try {
+    if (!accessToken) {
+      await showApp();
+      showSyncProblem('Sign in with Google before syncing.');
+      showToast('Sheet ID saved. Sign in to sync.');
+      return;
+    }
+    await initSheet(); clearSyncProblem(); showToast('Sheet ready! ✅'); await showApp(); await syncPendingEvents();
+  }
   catch (e) { console.error(e); showSyncProblem(e); showToast(formatSyncError(e).short); }
   finally { setButtonBusy(btn, false, '💾 Save & Continue'); }
 }
@@ -312,7 +320,13 @@ function formatSyncError(error) {
   if (lower.includes('requested entity was not found') || lower.includes('not found')) {
     return {
       short: 'Google Sheet not found. Local entries are safe.',
-      html: `<strong>Google Sheet not found or not shared with this Google account.</strong><br>Your BabyLog entries are still saved on this device. Open <strong>Sheet setup</strong>, paste the Sheet ID from a URL like <code>https://docs.google.com/spreadsheets/d/143MtTdaUKBB-h_tWxBxcJigaeMN-baF3KYQoH1pn8CA/edit?gid=0#gid=0, and make sure the signed-in Google account has edit access.<br>Current Sheet ID: <code>${escapeHtml(sheetId || 'none')}</code><br><button class="btn-secondary" style="margin-top:10px" onclick="showSetup()">Open Sheet setup</button>`
+      html: `<strong>Google Sheet not found or not shared with this Google account.</strong><br>Your BabyLog entries are still saved on this device. Open <strong>Sheet setup</strong>, paste the Sheet ID from a URL like <code>docs.google.com/spreadsheets/d/SHEET_ID/edit</code>, and make sure the signed-in Google account has edit access.<br>Current Sheet ID: <code>${escapeHtml(sheetId || 'none')}</code><br><button class="btn-secondary" style="margin-top:10px" onclick="showSetup()">Open Sheet setup</button>`
+    };
+  }
+  if (lower.includes('sign in with google') || lower.includes('sign in to sync')) {
+    return {
+      short: 'Sheet ID saved. Sign in to sync.',
+      html: `<strong>Sheet ID saved on this device.</strong><br>Your BabyLog entries are safe locally. Sign in with Google when you are ready to create/check the sheet tabs and sync pending entries.<br><button class="btn-secondary" style="margin-top:10px" onclick="signInWithGoogle()">Sign in with Google</button>`
     };
   }
   return { short: message, html: `<strong>Sync paused.</strong><br>${escapeHtml(message)}<br>Your entries remain saved locally and can be synced later.` };
