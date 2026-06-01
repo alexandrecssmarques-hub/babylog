@@ -312,7 +312,7 @@ function formatSyncError(error) {
   if (lower.includes('requested entity was not found') || lower.includes('not found')) {
     return {
       short: 'Google Sheet not found. Local entries are safe.',
-      html: `<strong>Google Sheet not found or not shared with this Google account.</strong><br>Your BabyLog entries are still saved on this device. Open <strong>Sheet setup</strong>, paste the Sheet ID from a URL like <code>docs.google.com/spreadsheets/d/SHEET_ID/edit</code>, and make sure the signed-in Google account has edit access.<br>Current Sheet ID: <code>${escapeHtml(sheetId || 'none')}</code><br><button class="btn-secondary" style="margin-top:10px" onclick="showSetup()">Open Sheet setup</button>`
+      html: `<strong>Google Sheet not found or not shared with this Google account.</strong><br>Your BabyLog entries are still saved on this device. Open <strong>Sheet setup</strong>, paste the Sheet ID from a URL like <code>https://docs.google.com/spreadsheets/d/143MtTdaUKBB-h_tWxBxcJigaeMN-baF3KYQoH1pn8CA/edit?gid=0#gid=0, and make sure the signed-in Google account has edit access.<br>Current Sheet ID: <code>${escapeHtml(sheetId || 'none')}</code><br><button class="btn-secondary" style="margin-top:10px" onclick="showSetup()">Open Sheet setup</button>`
     };
   }
   return { short: message, html: `<strong>Sync paused.</strong><br>${escapeHtml(message)}<br>Your entries remain saved locally and can be synced later.` };
