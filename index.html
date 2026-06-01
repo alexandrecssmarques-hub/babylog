@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>BabyLog</title>
+  <meta name="description" content="Track your baby's feeding and diaper events" />
+  <meta name="theme-color" content="#f9e4b7" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Google API -->
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;900&family=Fraunces:ital,wght@0,300;0,700;1,300&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #fdf6e8;
+      --warm: #f9e4b7;
+      --peach: #f4c88e;
+      --terra: #d4845a;
+      --deep: #3d2b1f;
+      --sage: #7a9e7e;
+      --sage-light: #b8d4bb;
+      --lavender: #c9b8e8;
+      --sky: #a8cfe8;
+      --sky-deep: #5b9dc4;
+      --poop-brown: #9b7240;
+      --poop-light: #d4a96a;
+      --white: #ffffff;
+      --shadow: 0 4px 24px rgba(61,43,31,0.10);
+      --shadow-lg: 0 8px 40px rgba(61,43,31,0.15);
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Nunito', sans-serif;
+      background: var(--cream);
+      color: var(--deep);
+      min-height: 100dvh;
+      overflow-x: hidden;
+    }
+
+    /* ── LOGIN SCREEN ── */
+    #login-screen {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 32px 24px;
+      background: linear-gradient(160deg, #fdf6e8 0%, #f9e4b7 60%, #f4c88e 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    #login-screen::before {
+      content: '';
+      position: absolute;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(201,184,232,0.35) 0%, transparent 70%);
+      top: -120px; right: -100px;
+    }
+    #login-screen::after {
+      content: '';
+      position: absolute;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(168,207,232,0.3) 0%, transparent 70%);
+      bottom: -80px; left: -60px;
+    }
+    .login-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 52px;
+      font-weight: 700;
+      color: var(--terra);
+      letter-spacing: -1px;
+      margin-bottom: 4px;
+      position: relative; z-index: 1;
+    }
+    .login-tagline {
+      font-size: 15px;
+      color: var(--poop-brown);
+      opacity: 0.7;
+      margin-bottom: 48px;
+      position: relative; z-index: 1;
+    }
+    .login-card {
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px);
+      border-radius: 28px;
+      padding: 36px 28px;
+      width: 100%;
+      max-width: 360px;
+      box-shadow: var(--shadow-lg);
+      position: relative; z-index: 1;
+      text-align: center;
+    }
+    .login-card h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      margin-bottom: 8px;
+      color: var(--deep);
+    }
+    .login-card p {
+      font-size: 13px;
+      color: var(--poop-brown);
+      opacity: 0.8;
+      margin-bottom: 28px;
+      line-height: 1.6;
+    }
+    .g-signin-wrapper {
+      display: flex;
+      justify-content: center;
+    }
+    .setup-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: var(--poop-brown);
+      opacity: 0.6;
+      line-height: 1.5;
+    }
+
+    /* ── APP SHELL ── */
+    #app { display: none; flex-direction: column; min-height: 100dvh; }
+
+    /* HEADER */
+    .app-header {
+      background: linear-gradient(90deg, var(--terra) 0%, #c06040 100%);
+      color: white;
+      padding: 16px 20px 12px;
+      padding-top: max(16px, env(safe-area-inset-top));
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: 0 2px 12px rgba(212,132,90,0.3);
+    }
+    .header-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+    .header-user {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .header-avatar {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.5);
+      background: var(--peach);
+      object-fit: cover;
+    }
+    .header-name {
+      font-size: 13px;
+      font-weight: 600;
+      opacity: 0.9;
+      max-width: 80px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .btn-logout {
+      background: rgba(255,255,255,0.2);
+      border: none;
+      color: white;
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+    }
+
+    /* TABS */
+    .tab-bar {
+      display: flex;
+      background: var(--white);
+      border-bottom: 2px solid var(--warm);
+      position: sticky;
+      top: 60px; z-index: 99;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 12px 8px;
+      border: none;
+      background: none;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--poop-brown);
+      opacity: 0.5;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .tab-btn.active {
+      opacity: 1;
+      color: var(--terra);
+      border-bottom: 3px solid var(--terra);
+      margin-bottom: -2px;
+    }
+    .tab-icon { font-size: 20px; }
+
+    /* CONTENT */
+    .tab-content { display: none; flex: 1; overflow-y: auto; padding: 20px 16px 100px; }
+    .tab-content.active { display: block; }
+
+    /* ── QUICK LOG BUTTONS ── */
+    .section-title {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      color: var(--deep);
+      margin-bottom: 16px;
+    }
+    .quick-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+    .quick-card {
+      border: none;
+      border-radius: var(--radius);
+      padding: 20px 16px;
+      cursor: pointer;
+      font-family: 'Nunito', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 6px;
+      transition: transform 0.15s, box-shadow 0.15s;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+    .quick-card:active { transform: scale(0.96); }
+    .quick-card.feeding { background: linear-gradient(135deg, #fff5e0 0%, #fce8c4 100%); }
+    .quick-card.poop { background: linear-gradient(135deg, #f5e8d0 0%, #e8d4b0 100%); }
+    .quick-card.bottle { background: linear-gradient(135deg, #e8f4f8 0%, #cce8f4 100%); }
+    .quick-card.note { background: linear-gradient(135deg, #f0e8f8 0%, #e4d4f0 100%); }
+    .quick-card .qc-icon { font-size: 32px; }
+    .quick-card .qc-label {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--deep);
+    }
+    .quick-card .qc-sub {
+      font-size: 11px;
+      color: var(--poop-brown);
+      opacity: 0.7;
+    }
+
+    /* ── MODAL ── */
+    .modal-backdrop {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(61,43,31,0.45);
+      z-index: 200;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .modal-backdrop.open { display: flex; }
+    .modal {
+      background: var(--white);
+      border-radius: 28px 28px 0 0;
+      padding: 28px 20px 40px;
+      width: 100%;
+      max-width: 480px;
+      max-height: 85dvh;
+      overflow-y: auto;
+      animation: slideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .modal-handle {
+      width: 40px; height: 4px;
+      background: var(--warm);
+      border-radius: 2px;
+      margin: 0 auto 20px;
+    }
+    .modal-title {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      color: var(--deep);
+      margin-bottom: 20px;
+    }
+
+    /* FORM */
+    .form-group { margin-bottom: 16px; }
+    .form-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--poop-brown);
+      margin-bottom: 6px;
+    }
+    .form-input, .form-select, .form-textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--warm);
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 15px;
+      color: var(--deep);
+      background: var(--cream);
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--terra);
+    }
+    .form-textarea { resize: none; height: 80px; }
+    .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .chip {
+      padding: 8px 14px;
+      border: 2px solid var(--warm);
+      border-radius: 20px;
+      font-family: 'Nunito', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--poop-brown);
+      background: var(--white);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .chip.selected {
+      background: var(--terra);
+      border-color: var(--terra);
+      color: white;
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 15px;
+      background: var(--terra);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 16px;
+      font-weight: 900;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: background 0.2s, transform 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-primary:active { transform: scale(0.98); }
+    .btn-primary:disabled { opacity: 0.5; }
+    .btn-primary.saving { background: var(--sage); }
+
+    /* ── TIMELINE / HISTORY ── */
+    .timeline { list-style: none; position: relative; }
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 22px; top: 0; bottom: 0;
+      width: 2px;
+      background: var(--warm);
+    }
+    .timeline-item {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .tl-dot {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      position: relative; z-index: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .tl-dot.feed { background: #fce8c4; }
+    .tl-dot.poop { background: #e8d4b0; }
+    .tl-dot.bottle { background: #cce8f4; }
+    .tl-dot.note { background: #e4d4f0; }
+    .tl-body {
+      background: white;
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      flex: 1;
+      box-shadow: var(--shadow);
+    }
+    .tl-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .tl-type {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--terra);
+    }
+    .tl-time {
+      font-size: 11px;
+      color: var(--poop-brown);
+      opacity: 0.6;
+    }
+    .tl-detail {
+      font-size: 13px;
+      color: var(--deep);
+      line-height: 1.5;
+    }
+    .tl-by {
+      font-size: 11px;
+      color: var(--poop-brown);
+      opacity: 0.5;
+      margin-top: 4px;
+    }
+    .tl-delete {
+      background: none;
+      border: none;
+      color: #e88;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 2px 4px;
+    }
+
+    /* EMPTY STATE */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      opacity: 0.5;
+    }
+    .empty-state .es-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 14px; }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white;
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+    .stat-val {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      color: var(--terra);
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 12px;
+      color: var(--poop-brown);
+      opacity: 0.7;
+      margin-top: 4px;
+    }
+
+    /* SETUP SCREEN */
+    #setup-screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100dvh;
+      padding: 32px 24px;
+      background: var(--cream);
+    }
+    .setup-card {
+      background: white;
+      border-radius: 28px;
+      padding: 32px 24px;
+      width: 100%; max-width: 400px;
+      box-shadow: var(--shadow-lg);
+    }
+    .setup-card h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
+    .setup-card p {
+      font-size: 13px;
+      color: var(--poop-brown);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+    .setup-steps { list-style: none; margin-bottom: 24px; }
+    .setup-steps li {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .step-num {
+      background: var(--terra);
+      color: white;
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+    .config-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid var(--warm);
+      border-radius: var(--radius-sm);
+      font-family: 'Nunito', sans-serif;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+    .config-input:focus { border-color: var(--terra); outline: none; }
+    .code-block {
+      background: #2d2d2d;
+      color: #f8f8f2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 11px;
+      font-family: monospace;
+      margin: 8px 0;
+      word-break: break-all;
+    }
+
+    /* LOADING SPINNER */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid rgba(255,255,255,0.3);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* TOAST */
+    .toast {
+      position: fixed;
+      bottom: 90px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--deep);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: 24px; right: 20px;
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      background: var(--terra);
+      color: white;
+      border: none;
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 6px 20px rgba(212,132,90,0.45);
+      cursor: pointer;
+      transition: transform 0.2s;
+      z-index: 150;
+    }
+    .fab:active { transform: scale(0.92); }
+
+    .date-header {
+      font-family: 'Fraunces', serif;
+      font-size: 15px;
+      color: var(--poop-brown);
+      opacity: 0.6;
+      margin: 16px 0 10px 52px;
+    }
+
+    .syncing-bar {
+      background: var(--sage-light);
+      text-align: center;
+      font-size: 12px;
+      padding: 4px;
+      color: var(--sage);
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+  <div class="login-logo">🍼 BabyLog</div>
+  <div class="login-tagline">Track feedings & diapers together</div>
+  <div class="login-card">
+    <h2>Welcome, parents! 👶</h2>
+    <p>Sign in with Google to access your shared baby tracker. Your data lives in your own Google Sheet.</p>
+    <div class="g-signin-wrapper">
+      <div id="g_id_onload"
+        data-client_id="270629967955-1ab76mpk3qosk3hdr6879t2be5i9kubb.apps.googleusercontent.com"
+        data-callback="handleCredentialResponse"
+        data-auto_prompt="false">
+      </div>
+      <div class="g_id_signin"
+        data-type="standard"
+        data-size="large"
+        data-theme="filled_blue"
+        data-text="sign_in_with"
+        data-shape="pill"
+        data-logo_alignment="left">
+      </div>
+    </div>
+    <div class="setup-note">First time? You'll be guided to set up your Google Sheet.</div>
+  </div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <h2>⚙️ First-time Setup</h2>
+    <p>BabyLog stores data in a Google Sheet you control. Follow these steps:</p>
+    <ol class="setup-steps">
+      <li>
+        <span class="step-num">1</span>
+        <span>Create a <strong>Google Sheet</strong> and paste its ID below. The ID is in the URL:<br/>
+        <span style="font-size:11px;color:#888;">docs.google.com/spreadsheets/d/<strong>THIS_PART</strong>/edit</span></span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span>Share the sheet with <strong>Edit</strong> access to both you and your partner's Gmail.</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span>Paste your Sheet ID below and tap Save.</span>
+      </li>
+    </ol>
+    <input class="config-input" id="sheet-id-input" placeholder="Google Sheet ID" autocomplete="off" />
+    <button class="btn-primary" onclick="saveSheetId()">💾 Save & Continue</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div id="sync-bar" class="syncing-bar" style="display:none">⟳ Syncing…</div>
+  <header class="app-header">
+    <div class="header-logo">🍼 BabyLog</div>
+    <div class="header-user">
+      <img class="header-avatar" id="user-avatar" src="" alt="" />
+      <span class="header-name" id="user-name"></span>
+      <button class="btn-logout" onclick="signOut()">Out</button>
+    </div>
+  </header>
+
+  <nav class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('log')" id="tab-log">
+      <span class="tab-icon">📋</span>Log
+    </button>
+    <button class="tab-btn" onclick="switchTab('history')" id="tab-history">
+      <span class="tab-icon">🕑</span>History
+    </button>
+    <button class="tab-btn" onclick="switchTab('stats')" id="tab-stats">
+      <span class="tab-icon">📊</span>Stats
+    </button>
+  </nav>
+
+  <!-- LOG TAB -->
+  <div class="tab-content active" id="content-log">
+    <div class="section-title">Quick Log</div>
+    <div class="quick-grid">
+      <button class="quick-card feeding" onclick="openModal('breastfeed')">
+        <span class="qc-icon">🤱</span>
+        <span class="qc-label">Breastfeed</span>
+        <span class="qc-sub">Duration + side</span>
+      </button>
+      <button class="quick-card bottle" onclick="openModal('bottle')">
+        <span class="qc-icon">🍼</span>
+        <span class="qc-label">Bottle</span>
+        <span class="qc-sub">Amount in ml</span>
+      </button>
+      <button class="quick-card poop" onclick="openModal('poop')">
+        <span class="qc-icon">💩</span>
+        <span class="qc-label">Diaper</span>
+        <span class="qc-sub">Poop & pee</span>
+      </button>
+      <button class="quick-card note" onclick="openModal('note')">
+        <span class="qc-icon">📝</span>
+        <span class="qc-label">Note</span>
+        <span class="qc-sub">Anything else</span>
+      </button>
+    </div>
+
+    <div class="section-title">Today's Summary</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="today-feeds">–</div>
+        <div class="stat-label">Feedings today</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="today-ml">–</div>
+        <div class="stat-label">ml from bottle</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="today-poops">–</div>
+        <div class="stat-label">Dirty diapers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="last-feed">–</div>
+        <div class="stat-label">Last feed</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY TAB -->
+  <div class="tab-content" id="content-history">
+    <div class="section-title">Recent Events</div>
+    <ul class="timeline" id="timeline-list">
+      <div class="empty-state">
+        <div class="es-icon">🌙</div>
+        <p>No events yet.<br/>Use Quick Log to add entries.</p>
+      </div>
+    </ul>
+  </div>
+
+  <!-- STATS TAB -->
+  <div class="tab-content" id="content-stats">
+    <div class="section-title">Last 7 Days</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="week-feeds">–</div>
+        <div class="stat-label">Total feedings</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="week-ml">–</div>
+        <div class="stat-label">Total ml (bottle)</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="week-poops">–</div>
+        <div class="stat-label">Dirty diapers</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="avg-feed-gap">–</div>
+        <div class="stat-label">Avg feed gap (h)</div>
+      </div>
+    </div>
+    <div class="section-title">Diaper Textures (7 days)</div>
+    <div id="texture-breakdown" style="background:white;border-radius:16px;padding:16px;box-shadow:var(--shadow);">
+      <div style="opacity:0.4;font-size:13px;">No data yet</div>
+    </div>
+  </div>
+</div>
+
+<!-- BREASTFEED MODAL -->
+<div class="modal-backdrop" id="modal-breastfeed" onclick="closeModal('breastfeed')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🤱 Breastfeed</div>
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" id="bf-datetime" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Side</label>
+      <div class="chip-group">
+        <button class="chip selected" data-group="bf-side" data-val="Left" onclick="selectChip(this)">Left</button>
+        <button class="chip" data-group="bf-side" data-val="Right" onclick="selectChip(this)">Right</button>
+        <button class="chip" data-group="bf-side" data-val="Both" onclick="selectChip(this)">Both</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Duration (minutes)</label>
+      <input type="number" class="form-input" id="bf-duration" placeholder="e.g. 15" min="1" max="60" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-textarea" id="bf-notes" placeholder="Any observations…"></textarea>
+    </div>
+    <button class="btn-primary" id="btn-save-bf" onclick="saveEvent('breastfeed')">
+      Save Feeding
+    </button>
+  </div>
+</div>
+
+<!-- BOTTLE MODAL -->
+<div class="modal-backdrop" id="modal-bottle" onclick="closeModal('bottle')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">🍼 Bottle</div>
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" id="bt-datetime" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Amount (ml)</label>
+      <input type="number" class="form-input" id="bt-amount" placeholder="e.g. 120" min="10" max="300" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Content</label>
+      <div class="chip-group">
+        <button class="chip selected" data-group="bt-content" data-val="Breast milk" onclick="selectChip(this)">Breast milk</button>
+        <button class="chip" data-group="bt-content" data-val="Formula" onclick="selectChip(this)">Formula</button>
+        <button class="chip" data-group="bt-content" data-val="Mixed" onclick="selectChip(this)">Mixed</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-textarea" id="bt-notes" placeholder="Any observations…"></textarea>
+    </div>
+    <button class="btn-primary" id="btn-save-bt" onclick="saveEvent('bottle')">
+      Save Bottle
+    </button>
+  </div>
+</div>
+
+<!-- POOP MODAL -->
+<div class="modal-backdrop" id="modal-poop" onclick="closeModal('poop')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">💩 Diaper Change</div>
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" id="dp-datetime" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Type</label>
+      <div class="chip-group">
+        <button class="chip selected" data-group="dp-type" data-val="Poop + Pee" onclick="selectChip(this)">💩+💧 Both</button>
+        <button class="chip" data-group="dp-type" data-val="Poop only" onclick="selectChip(this)">💩 Poop</button>
+        <button class="chip" data-group="dp-type" data-val="Pee only" onclick="selectChip(this)">💧 Pee</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Poop Texture</label>
+      <div class="chip-group">
+        <button class="chip selected" data-group="dp-texture" data-val="Soft" onclick="selectChip(this)">Soft</button>
+        <button class="chip" data-group="dp-texture" data-val="Mushy" onclick="selectChip(this)">Mushy</button>
+        <button class="chip" data-group="dp-texture" data-val="Watery" onclick="selectChip(this)">Watery</button>
+        <button class="chip" data-group="dp-texture" data-val="Hard" onclick="selectChip(this)">Hard</button>
+        <button class="chip" data-group="dp-texture" data-val="N/A" onclick="selectChip(this)">N/A</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Color</label>
+      <div class="chip-group">
+        <button class="chip selected" data-group="dp-color" data-val="Yellow" onclick="selectChip(this)">🟡 Yellow</button>
+        <button class="chip" data-group="dp-color" data-val="Brown" onclick="selectChip(this)">🟤 Brown</button>
+        <button class="chip" data-group="dp-color" data-val="Green" onclick="selectChip(this)">🟢 Green</button>
+        <button class="chip" data-group="dp-color" data-val="Black" onclick="selectChip(this)">⚫ Black</button>
+        <button class="chip" data-group="dp-color" data-val="N/A" onclick="selectChip(this)">N/A</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Notes (optional)</label>
+      <textarea class="form-textarea" id="dp-notes" placeholder="Rash, amount, etc…"></textarea>
+    </div>
+    <button class="btn-primary" id="btn-save-dp" onclick="saveEvent('poop')">
+      Save Diaper
+    </button>
+  </div>
+</div>
+
+<!-- NOTE MODAL -->
+<div class="modal-backdrop" id="modal-note" onclick="closeModal('note')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">📝 Note</div>
+    <div class="form-group">
+      <label class="form-label">Date & Time</label>
+      <input type="datetime-local" class="form-input" id="nt-datetime" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Category</label>
+      <div class="chip-group">
+        <button class="chip selected" data-group="nt-cat" data-val="General" onclick="selectChip(this)">General</button>
+        <button class="chip" data-group="nt-cat" data-val="Sleep" onclick="selectChip(this)">😴 Sleep</button>
+        <button class="chip" data-group="nt-cat" data-val="Mood" onclick="selectChip(this)">😊 Mood</button>
+        <button class="chip" data-group="nt-cat" data-val="Health" onclick="selectChip(this)">🏥 Health</button>
+        <button class="chip" data-group="nt-cat" data-val="Milestone" onclick="selectChip(this)">⭐ Milestone</button>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Note</label>
+      <textarea class="form-textarea" id="nt-text" placeholder="Write your note here…" style="height:100px;"></textarea>
+    </div>
+    <button class="btn-primary" id="btn-save-nt" onclick="saveEvent('note')">
+      Save Note
+    </button>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════
+//  CONFIG — edit these before use
+// ═══════════════════════════════════
+const CLIENT_ID = '270629967955-1ab76mpk3qosk3hdr6879t2be5i9kubb.apps.googleusercontent.com'; // ← replace
+const SCOPES = 'https://www.googleapis.com/auth/spreadsheets https://www.googleapis.com/auth/drive.file';
+
+// Sheet tab names
+const SHEETS = {
+  feedings: 'Feedings',
+  diapers: 'Diapers',
+  notes: 'Notes'
+};
+
+const FEED_HEADERS   = ['Timestamp','Type','Side','Duration (min)','Amount (ml)','Content','Notes','LoggedBy'];
+const DIAPER_HEADERS = ['Timestamp','Type','Texture','Color','Notes','LoggedBy'];
+const NOTE_HEADERS   = ['Timestamp','Category','Note','LoggedBy'];
+
+// ═══════════════════════════════════
+//  STATE
+// ═══════════════════════════════════
+let currentUser = null;
+let accessToken = null;
+let sheetId = localStorage.getItem('babylog_sheet_id') || '';
+let events = [];
+
+// ═══════════════════════════════════
+//  GOOGLE SIGN-IN
+// ═══════════════════════════════════
+function handleCredentialResponse(response) {
+  const payload = parseJwt(response.credential);
+  currentUser = {
+    name: payload.name,
+    email: payload.email,
+    picture: payload.picture
+  };
+  // Now get an access token for Sheets
+  google.accounts.oauth2.initTokenClient({
+    client_id: CLIENT_ID,
+    scope: SCOPES,
+    callback: (tokenResp) => {
+      if (tokenResp.error) { showToast('Auth error: ' + tokenResp.error); return; }
+      accessToken = tokenResp.access_token;
+      onSignedIn();
+    }
+  }).requestAccessToken();
+}
+
+function parseJwt(token) {
+  const base64 = token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/');
+  return JSON.parse(atob(base64));
+}
+
+function onSignedIn() {
+  document.getElementById('user-avatar').src = currentUser.picture || '';
+  document.getElementById('user-name').textContent = currentUser.name.split(' ')[0];
+  document.getElementById('login-screen').style.display = 'none';
+  if (!sheetId) {
+    document.getElementById('setup-screen').style.display = 'flex';
+  } else {
+    showApp();
+  }
+}
+
+function saveSheetId() {
+  const val = document.getElementById('sheet-id-input').value.trim();
+  if (!val) { showToast('Please paste your Sheet ID'); return; }
+  sheetId = val;
+  localStorage.setItem('babylog_sheet_id', val);
+  initSheet().then(() => showApp());
+}
+
+function signOut() {
+  google.accounts.id.disableAutoSelect();
+  currentUser = null; accessToken = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  showToast('Signed out');
+}
+
+// ═══════════════════════════════════
+//  SHOW APP + LOAD DATA
+// ═══════════════════════════════════
+function showApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  setNow('bf-datetime'); setNow('bt-datetime'); setNow('dp-datetime'); setNow('nt-datetime');
+  loadAllData();
+}
+
+// ═══════════════════════════════════
+//  SHEETS API HELPERS
+// ═══════════════════════════════════
+async function sheetsGet(range) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(range)}`;
+  const r = await fetch(url, { headers: { Authorization: `Bearer ${accessToken}` } });
+  return r.json();
+}
+
+async  function sheetsAppend(sheetName, values) {
+  const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${encodeURIComponent(sheetName)}!A1:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`;
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ values })
+  });
+  return r.json();
+}
+
+async function initSheet() {
+  // Create header rows if empty
+  for (const [key, name] of Object.entries(SHEETS)) {
+    const data = await sheetsGet(`${name}!A1:A1`);
+    if (!data.values) {
+      const headers = key === 'feedings' ? FEED_HEADERS : key === 'diapers' ? DIAPER_HEADERS : NOTE_HEADERS;
+      await sheetsAppend(name, [headers]);
+    }
+  }
+  showToast('Sheet ready! ✅');
+}
+
+async function loadAllData() {
+  setSyncBar(true);
+  try {
+    events = [];
+    const [feedRes, diaperRes, noteRes] = await Promise.all([
+      sheetsGet(`${SHEETS.feedings}!A2:H`),
+      sheetsGet(`${SHEETS.diapers}!A2:F`),
+      sheetsGet(`${SHEETS.notes}!A2:D`)
+    ]);
+    (feedRes.values || []).forEach(r => events.push({ type: r[1]==='Breastfeed'?'breastfeed':'bottle', ts: r[0], data: r }));
+    (diaperRes.values || []).forEach(r => events.push({ type: 'poop', ts: r[0], data: r }));
+    (noteRes.values || []).forEach(r => events.push({ type: 'note', ts: r[0], data: r }));
+    events.sort((a,b) => new Date(b.ts) - new Date(a.ts));
+    renderTimeline();
+    updateSummary();
+    updateStats();
+  } catch(e) { showToast('Load error – check Sheet ID'); }
+  setSyncBar(false);
+}
+
+// ═══════════════════════════════════
+//  SAVE EVENT
+// ═══════════════════════════════════
+async function saveEvent(type) {
+  const btn = document.getElementById(`btn-save-${type==='breastfeed'?'bf':type==='bottle'?'bt':type==='poop'?'dp':'nt'}`);
+  btn.disabled = true;
+  btn.classList.add('saving');
+  btn.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    const by = currentUser.name;
+    let row, sheet;
+
+    if (type === 'breastfeed') {
+      const dt = document.getElementById('bf-datetime').value;
+      const side = getChip('bf-side');
+      const dur = document.getElementById('bf-duration').value;
+      const notes = document.getElementById('bf-notes').value;
+      row = [dt, 'Breastfeed', side, dur, '', '', notes, by];
+      sheet = SHEETS.feedings;
+    } else if (type === 'bottle') {
+      const dt = document.getElementById('bt-datetime').value;
+      const amt = document.getElementById('bt-amount').value;
+      const content = getChip('bt-content');
+      const notes = document.getElementById('bt-notes').value;
+      row = [dt, 'Bottle', '', '', amt, content, notes, by];
+      sheet = SHEETS.feedings;
+    } else if (type === 'poop') {
+      const dt = document.getElementById('dp-datetime').value;
+      const dtype = getChip('dp-type');
+      const texture = getChip('dp-texture');
+      const color = getChip('dp-color');
+      const notes = document.getElementById('dp-notes').value;
+      row = [dt, dtype, texture, color, notes, by];
+      sheet = SHEETS.diapers;
+    } else {
+      const dt = document.getElementById('nt-datetime').value;
+      const cat = getChip('nt-cat');
+      const text = document.getElementById('nt-text').value;
+      row = [dt, cat, text, by];
+      sheet = SHEETS.notes;
+    }
+
+    await sheetsAppend(sheet, [row]);
+    showToast('Saved! ✅');
+    closeModal(type);
+    await loadAllData();
+  } catch(e) {
+    showToast('Save failed – try again');
+  }
+
+  btn.disabled = false;
+  btn.classList.remove('saving');
+  const labels = { breastfeed: 'Save Feeding', bottle: 'Save Bottle', poop: 'Save Diaper', note: 'Save Note' };
+  btn.innerHTML = labels[type];
+}
+
+// ═══════════════════════════════════
+//  RENDER TIMELINE
+// ═══════════════════════════════════
+function renderTimeline() {
+  const list = document.getElementById('timeline-list');
+  if (!events.length) {
+    list.innerHTML = `<div class="empty-state"><div class="es-icon">🌙</div><p>No events yet.<br/>Use Quick Log to add entries.</p></div>`;
+    return;
+  }
+  let html = '';
+  let lastDate = '';
+  events.slice(0, 60).forEach(ev => {
+    const d = new Date(ev.ts);
+    const dateStr = isNaN(d) ? ev.ts : d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long' });
+    if (dateStr !== lastDate) {
+      html += `<div class="date-header">${dateStr}</div>`;
+      lastDate = dateStr;
+    }
+    html += renderTimelineItem(ev);
+  });
+  list.innerHTML = html;
+}
+
+function renderTimelineItem(ev) {
+  const d = new Date(ev.ts);
+  const timeStr = isNaN(d) ? ev.ts : d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+  let icon, typeLabel, detail, dotClass;
+
+  if (ev.type === 'breastfeed') {
+    icon='🤱'; typeLabel='Breastfeed'; dotClass='feed';
+    detail = `Side: ${ev.data[2] || '–'} · ${ev.data[3] || '?'} min`;
+  } else if (ev.type === 'bottle') {
+    icon='🍼'; typeLabel='Bottle'; dotClass='bottle';
+    detail = `${ev.data[4] || '?'} ml · ${ev.data[5] || ''}`;
+  } else if (ev.type === 'poop') {
+    icon='💩'; typeLabel='Diaper'; dotClass='poop';
+    detail = `${ev.data[1] || ''} · Texture: ${ev.data[2] || '–'} · Color: ${ev.data[3] || '–'}`;
+  } else {
+    icon='📝'; typeLabel=`Note (${ev.data[1]||''})`; dotClass='note';
+    detail = ev.data[2] || '';
+  }
+
+  const by = ev.data[ev.data.length-1] || '';
+  return `<li class="timeline-item">
+    <div class="tl-dot ${dotClass}">${icon}</div>
+    <div class="tl-body">
+      <div class="tl-header">
+        <span class="tl-type">${typeLabel}</span>
+        <span class="tl-time">${timeStr}</span>
+      </div>
+      <div class="tl-detail">${detail}</div>
+      ${by ? `<div class="tl-by">by ${by}</div>` : ''}
+    </div>
+  </li>`;
+}
+
+// ═══════════════════════════════════
+//  STATS
+// ═══════════════════════════════════
+function updateSummary() {
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayEvents = events.filter(e => new Date(e.ts) >= today);
+  const feeds = todayEvents.filter(e => e.type==='breastfeed'||e.type==='bottle');
+  const poops = todayEvents.filter(e => e.type==='poop'&&e.data[1]!=='Pee only');
+  const ml = todayEvents.filter(e=>e.type==='bottle').reduce((s,e)=>s+(parseFloat(e.data[4])||0),0);
+  document.getElementById('today-feeds').textContent = feeds.length;
+  document.getElementById('today-ml').textContent = ml || '–';
+  document.getElementById('today-poops').textContent = poops.length;
+  const lastFeed = feeds[0];
+  document.getElementById('last-feed').textContent = lastFeed ? new Date(lastFeed.ts).toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'}) : '–';
+}
+
+function updateStats() {
+  const week = new Date(); week.setDate(week.getDate()-7);
+  const wEvents = events.filter(e => new Date(e.ts) >= week);
+  const wFeeds = wEvents.filter(e=>e.type==='breastfeed'||e.type==='bottle');
+  const wPoops = wEvents.filter(e=>e.type==='poop'&&e.data[1]!=='Pee only');
+  const wMl = wEvents.filter(e=>e.type==='bottle').reduce((s,e)=>s+(parseFloat(e.data[4])||0),0);
+
+  document.getElementById('week-feeds').textContent = wFeeds.length;
+  document.getElementById('week-ml').textContent = wMl||'–';
+  document.getElementById('week-poops').textContent = wPoops.length;
+
+  // Avg gap between feeds
+  if (wFeeds.length >= 2) {
+    const sorted = [...wFeeds].sort((a,b)=>new Date(a.ts)-new Date(b.ts));
+    let totalGap = 0;
+    for (let i=1; i<sorted.length; i++) {
+      totalGap += (new Date(sorted[i].ts)-new Date(sorted[i-1].ts))/(1000*3600);
+    }
+    document.getElementById('avg-feed-gap').textContent = (totalGap/(sorted.length-1)).toFixed(1);
+  } else {
+    document.getElementById('avg-feed-gap').textContent = '–';
+  }
+
+  // Texture breakdown
+  const textureCounts = {};
+  wPoops.forEach(e => {
+    const t = e.data[2]||'Unknown';
+    textureCounts[t] = (textureCounts[t]||0)+1;
+  });
+  const tb = document.getElementById('texture-breakdown');
+  if (!Object.keys(textureCounts).length) {
+    tb.innerHTML = '<div style="opacity:0.4;font-size:13px;">No poop data this week 🎉</div>';
+  } else {
+    tb.innerHTML = Object.entries(textureCounts).map(([t,c]) =>
+      `<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--warm);font-size:14px;">
+        <span>${t}</span><strong>${c}x</strong>
+       </div>`
+    ).join('');
+  }
+}
+
+// ═══════════════════════════════════
+//  UI HELPERS
+// ═══════════════════════════════════
+function openModal(type) {
+  setNow(type==='breastfeed'?'bf-datetime':type==='bottle'?'bt-datetime':type==='poop'?'dp-datetime':'nt-datetime');
+  document.getElementById(`modal-${type}`).classList.add('open');
+}
+function closeModal(type) { document.getElementById(`modal-${type}`).classList.remove('open'); }
+
+function switchTab(tab) {
+  ['log','history','stats'].forEach(t => {
+    document.getElementById(`tab-${t}`).classList.toggle('active', t===tab);
+    document.getElementById(`content-${t}`).classList.toggle('active', t===tab);
+  });
+}
+
+function selectChip(el) {
+  const group = el.dataset.group;
+  document.querySelectorAll(`.chip[data-group="${group}"]`).forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function getChip(group) {
+  return document.querySelector(`.chip[data-group="${group}"].selected`)?.dataset.val || '';
+}
+
+function setNow(id) {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  document.getElementById(id).value = now.toISOString().slice(0,16);
+}
+
+function setSyncBar(show) {
+  document.getElementById('sync-bar').style.display = show ? 'block' : 'none';
+}
+
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>
