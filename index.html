@@ -28,7 +28,7 @@
       <button class="btn-primary" id="google-signin-btn" onclick="signInWithGoogle()">Sign in with Google</button>
       <button class="btn-secondary" onclick="continueOffline()">Use offline on this device</button>
     </div>
-    <div class="setup-note">Tip: offline entries are kept in this browser and will retry syncing after setup.</div>
+    <div class="setup-note">Tip: after your first Google sign-in, BabyLog will restore your session automatically when Google allows it.</div>
   </div>
 </section>
 
@@ -88,7 +88,7 @@
 
 <script>
 const CLIENT_ID = '270629967955-1ab76mpk3qosk3hdr6879t2be5i9kubb.apps.googleusercontent.com';
-const SCOPES = 'https://www.googleapis.com/auth/spreadsheets';
+const SCOPES = 'openid email profile https://www.googleapis.com/auth/spreadsheets';
 const SHEETS = { feedings: 'Feedings', diapers: 'Diapers', notes: 'Notes' };
 const HEADERS = {
   feedings: ['Timestamp','Type','Side','Duration (min)','Amount (ml)','Content','Notes','LoggedBy','EventId'],
@@ -98,54 +98,103 @@ const HEADERS = {
 const STORAGE_KEY = 'babylog_events_v2';
 const SHEET_ID_KEY = 'babylog_sheet_id';
 const USER_KEY = 'babylog_user_v1';
+const TOKEN_EXPIRES_KEY = 'babylog_google_token_expires_at';
+const TOKEN_EXPIRY_SAFETY_MS = 60000;
 
-let currentUser = readJson(USER_KEY) || { name: 'Offline caregiver', email: '', picture: '' };
+let currentUser = readJson(USER_KEY) || { name: 'Offline caregiver', email: '', picture: '', googleSignedIn: false };
+if (currentUser.googleSignedIn === undefined) currentUser.googleSignedIn = currentUser.email || currentUser.name === 'Google user';
 let accessToken = null;
+let tokenClient = null;
+let silentSignInTried = false;
 const savedSheetId = localStorage.getItem(SHEET_ID_KEY) || '';
 let sheetId = normalizeSheetId(savedSheetId);
 if (savedSheetId && savedSheetId !== sheetId) localStorage.setItem(SHEET_ID_KEY, sheetId);
 let events = readEvents();
 
-window.addEventListener('load', () => {
+window.addEventListener('load', async () => {
   renderUser();
-  if (currentUser.email || events.length || sheetId) showApp();
+  if (currentUser.googleSignedIn || currentUser.email || events.length || sheetId) await showApp();
+  if (currentUser.googleSignedIn) restoreGoogleSession();
 });
-window.addEventListener('online', () => syncPendingEvents());
+window.addEventListener('online', () => ensureGoogleToken({ interactive: false }).then(syncPendingEvents).catch(() => updateStorageStatus()));
 
-function signInWithGoogle() {
-  if (!window.google?.accounts?.oauth2) {
-    loadGoogleApis().then(requestGoogleToken).catch(() => showToast('Could not load Google sign-in'));
-  } else requestGoogleToken();
+function signInWithGoogle() { ensureGoogleToken({ interactive: true }).catch(() => showToast('Could not load Google sign-in')); }
+async function restoreGoogleSession() {
+  if (silentSignInTried || hasUsableToken()) return;
+  silentSignInTried = true;
+  try {
+    await ensureGoogleToken({ interactive: false });
+    await syncPendingEvents();
+  } catch (e) {
+    console.info('Silent Google sign-in unavailable:', e);
+    updateStorageStatus();
+  }
 }
 function loadGoogleApis() {
   return new Promise((resolve, reject) => {
+    if (window.google?.accounts?.oauth2) { resolve(); return; }
+    const existing = document.querySelector('script[data-google-identity]');
+    if (existing) { existing.addEventListener('load', resolve, { once: true }); existing.addEventListener('error', reject, { once: true }); return; }
     const s = document.createElement('script');
     s.src = 'https://accounts.google.com/gsi/client';
-    s.async = true; s.defer = true;
+    s.async = true; s.defer = true; s.dataset.googleIdentity = 'true';
     s.onload = resolve; s.onerror = reject;
     document.head.appendChild(s);
   });
 }
-function requestGoogleToken() {
-  google.accounts.oauth2.initTokenClient({
-    client_id: CLIENT_ID,
-    scope: SCOPES,
-    prompt: '',
-    callback: tokenResp => {
-      if (tokenResp.error) { showToast('Auth error: ' + tokenResp.error); return; }
-      accessToken = tokenResp.access_token;
-      currentUser = { name: 'Google user', email: '', picture: '' };
-      saveJson(USER_KEY, currentUser);
-      renderUser();
-      if (!sheetId) showSetup(); else showApp().then(syncPendingEvents);
-    }
-  }).requestAccessToken({ prompt: 'consent' });
+async function ensureGoogleToken({ interactive = false } = {}) {
+  if (hasUsableToken()) return accessToken;
+  await loadGoogleApis();
+  return requestGoogleToken({ interactive });
 }
-function continueOffline() { currentUser = { name: 'Offline caregiver', email: '', picture: '' }; saveJson(USER_KEY, currentUser); renderUser(); showApp(); }
+function hasUsableToken() {
+  const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_KEY) || 0);
+  return Boolean(accessToken && expiresAt && Date.now() < expiresAt - TOKEN_EXPIRY_SAFETY_MS);
+}
+function requestGoogleToken({ interactive = true } = {}) {
+  return new Promise((resolve, reject) => {
+    tokenClient = google.accounts.oauth2.initTokenClient({
+      client_id: CLIENT_ID,
+      scope: SCOPES,
+      callback: async tokenResp => {
+        if (tokenResp.error) {
+          if (interactive) showToast('Auth error: ' + tokenResp.error);
+          reject(new Error(tokenResp.error));
+          return;
+        }
+        accessToken = tokenResp.access_token;
+        localStorage.setItem(TOKEN_EXPIRES_KEY, String(Date.now() + ((Number(tokenResp.expires_in) || 3600) * 1000)));
+        await refreshGoogleProfile();
+        renderUser();
+        clearSyncProblem();
+        if (!sheetId) showSetup(); else await showApp().then(syncPendingEvents);
+        resolve(accessToken);
+      }
+    });
+    tokenClient.requestAccessToken({ prompt: interactive && !currentUser.googleSignedIn ? 'consent' : '' });
+  });
+}
+async function refreshGoogleProfile() {
+  currentUser = { ...currentUser, name: currentUser.name || 'Google user', googleSignedIn: true };
+  try {
+    const r = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (r.ok) {
+      const profile = await r.json();
+      currentUser = {
+        name: profile.name || profile.given_name || currentUser.name || 'Google user',
+        email: profile.email || currentUser.email || '',
+        picture: profile.picture || currentUser.picture || '',
+        googleSignedIn: true
+      };
+    }
+  } catch (e) { console.info('Could not load Google profile:', e); }
+  saveJson(USER_KEY, currentUser);
+}
+function continueOffline() { currentUser = { name: 'Offline caregiver', email: '', picture: '', googleSignedIn: false }; saveJson(USER_KEY, currentUser); renderUser(); showApp(); }
 function renderUser() { document.getElementById('user-name').textContent = (currentUser.name || 'Offline').split(' ')[0]; document.getElementById('user-avatar').src = currentUser.picture || ''; }
 function showSetup() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('app').style.display = 'none'; document.getElementById('setup-screen').classList.remove('hidden'); document.getElementById('setup-screen').style.display = 'flex'; document.getElementById('sheet-id-input').value = sheetId; }
 async function showApp() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('setup-screen').classList.add('hidden'); document.getElementById('app').style.display = 'flex'; ['bf-datetime','bt-datetime','dp-datetime','nt-datetime'].forEach(setNow); await loadAllData(); }
-function signOut() { accessToken = null; currentUser = { name: 'Offline caregiver', email: '', picture: '' }; localStorage.setItem(USER_KEY, JSON.stringify(currentUser)); document.getElementById('app').style.display = 'none'; document.getElementById('login-screen').classList.remove('hidden'); showToast('Signed out. Local data remains saved.'); }
+function signOut() { accessToken = null; localStorage.removeItem(TOKEN_EXPIRES_KEY); currentUser = { name: 'Offline caregiver', email: '', picture: '', googleSignedIn: false }; localStorage.setItem(USER_KEY, JSON.stringify(currentUser)); document.getElementById('app').style.display = 'none'; document.getElementById('login-screen').classList.remove('hidden'); showToast('Signed out. Local data remains saved.'); }
 
 async function saveSheetId() {
   const val = normalizeSheetId(document.getElementById('sheet-id-input').value);
@@ -154,21 +203,21 @@ async function saveSheetId() {
   sheetId = val; localStorage.setItem(SHEET_ID_KEY, val);
   const btn = document.getElementById('save-sheet-btn'); setButtonBusy(btn, true);
   try {
-    if (!accessToken) {
-      await showApp();
-      showSyncProblem('Sign in with Google before syncing.');
-      showToast('Sheet ID saved. Sign in to sync.');
-      return;
-    }
+    await ensureGoogleToken({ interactive: !currentUser.googleSignedIn });
     await initSheet(); clearSyncProblem(); showToast('Sheet ready! ✅'); await showApp(); await syncPendingEvents();
   }
-  catch (e) { console.error(e); showSyncProblem(e); showToast(formatSyncError(e).short); }
+  catch (e) {
+    console.error(e);
+    await showApp();
+    showSyncProblem(e.message === 'interaction_required' ? 'Sign in with Google before syncing.' : e);
+    showToast(formatSyncError(e).short);
+  }
   finally { setButtonBusy(btn, false, '💾 Save & Continue'); }
 }
 
 async function sheetsRequest(path, options = {}) {
   if (!sheetId) throw new Error('No Sheet ID configured');
-  if (!accessToken) throw new Error('Sign in to sync with Google Sheets');
+  await ensureGoogleToken({ interactive: false });
   const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}${path}`;
   const r = await fetch(url, { ...options, headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json', ...(options.headers || {}) } });
   const data = await r.json().catch(() => ({}));
@@ -209,7 +258,9 @@ async function loadAllData() {
   finally { sortAndRender(); setSyncBar(false); updateStorageStatus(); }
 }
 async function syncPendingEvents() {
-  if (!sheetId || !accessToken) { updateStorageStatus(); showSyncProblem(!sheetId ? 'Add a Google Sheet ID before syncing.' : 'Sign in with Google before syncing.'); return; }
+  if (!sheetId) { updateStorageStatus(); showSyncProblem('Add a Google Sheet ID before syncing.'); return; }
+  try { await ensureGoogleToken({ interactive: false }); }
+  catch (e) { updateStorageStatus(); showSyncProblem('Sign in with Google before syncing.'); return; }
   clearSyncProblem();
   setSyncBar(true);
   try {
@@ -304,7 +355,7 @@ function getChip(group) { return document.querySelector(`.chip[data-group="${gro
 function setNow(id) { const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); document.getElementById(id).value = now.toISOString().slice(0,16); }
 function setSyncBar(show) { document.getElementById('sync-bar').classList.toggle('hidden', !show); }
 function setButtonBusy(btn, busy, label) { btn.disabled = busy; btn.innerHTML = busy ? '<div class="spinner"></div>' : label; }
-function updateStorageStatus() { const pending = events.filter(e => !e.synced).length; const mode = sheetId ? (accessToken ? 'Google Sheet connected' : 'Sheet configured; sign in to sync') : 'Local-only mode'; document.getElementById('storage-status').textContent = pending ? `${mode} · ${pending} local entr${pending === 1 ? 'y' : 'ies'} pending sync` : `${mode} · all entries saved`; }
+function updateStorageStatus() { const pending = events.filter(e => !e.synced).length; const mode = sheetId ? (accessToken ? 'Google Sheet connected' : (currentUser.googleSignedIn ? 'Restoring Google session' : 'Sheet configured; sign in to sync')) : 'Local-only mode'; document.getElementById('storage-status').textContent = pending ? `${mode} · ${pending} local entr${pending === 1 ? 'y' : 'ies'} pending sync` : `${mode} · all entries saved`; }
 function formatSyncError(error) {
   const message = typeof error === 'string' ? error : (error?.message || 'Sync failed; entries remain saved locally.');
   const lower = message.toLowerCase();
@@ -323,10 +374,10 @@ function formatSyncError(error) {
       html: `<strong>Google Sheet not found or not shared with this Google account.</strong><br>Your BabyLog entries are still saved on this device. Open <strong>Sheet setup</strong>, paste the Sheet ID from a URL like <code>docs.google.com/spreadsheets/d/SHEET_ID/edit</code>, and make sure the signed-in Google account has edit access.<br>Current Sheet ID: <code>${escapeHtml(sheetId || 'none')}</code><br><button class="btn-secondary" style="margin-top:10px" onclick="showSetup()">Open Sheet setup</button>`
     };
   }
-  if (lower.includes('sign in with google') || lower.includes('sign in to sync')) {
+  if (lower.includes('sign in with google') || lower.includes('sign in to sync') || lower.includes('interaction_required')) {
     return {
-      short: 'Sheet ID saved. Sign in to sync.',
-      html: `<strong>Sheet ID saved on this device.</strong><br>Your BabyLog entries are safe locally. Sign in with Google when you are ready to create/check the sheet tabs and sync pending entries.<br><button class="btn-secondary" style="margin-top:10px" onclick="signInWithGoogle()">Sign in with Google</button>`
+      short: 'Sign in to sync.',
+      html: `<strong>Google needs one more sign-in before syncing.</strong><br>Your BabyLog entries are safe locally. Tap below to restore Google Sheet sync.<br><button class="btn-secondary" style="margin-top:10px" onclick="signInWithGoogle()">Sign in with Google</button>`
     };
   }
   return { short: message, html: `<strong>Sync paused.</strong><br>${escapeHtml(message)}<br>Your entries remain saved locally and can be synced later.` };
