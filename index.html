@@ -9,7 +9,7 @@
   <style>
     :root{--cream:#fdf6e8;--warm:#f9e4b7;--peach:#f4c88e;--terra:#d4845a;--deep:#3d2b1f;--sage:#7a9e7e;--sage-light:#dcebdd;--white:#fff;--poop-brown:#9b7240;--shadow:0 4px 24px rgba(61,43,31,.10);--shadow-lg:0 8px 40px rgba(61,43,31,.15);--radius:20px;--radius-sm:12px}
     *{box-sizing:border-box;margin:0;padding:0} body{font-family:Nunito,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--cream);color:var(--deep);min-height:100dvh;overflow-x:hidden}.hidden{display:none!important}
-    #login-screen,#setup-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:32px 24px;background:linear-gradient(160deg,#fdf6e8 0%,#f9e4b7 60%,#f4c88e 100%);position:relative;overflow:hidden}.login-logo{font-family:Georgia,serif;font-size:52px;font-weight:700;color:var(--terra);letter-spacing:-1px;margin-bottom:4px;position:relative;z-index:1}.login-tagline{font-size:15px;color:var(--poop-brown);opacity:.75;margin-bottom:48px}.login-card,.setup-card{background:rgba(255,255,255,.9);backdrop-filter:blur(16px);border-radius:28px;padding:32px 24px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);text-align:center}.login-card h2,.setup-card h2{font-family:Georgia,serif;font-size:22px;margin-bottom:8px}.login-card p,.setup-card p{font-size:13px;color:var(--poop-brown);opacity:.85;margin-bottom:20px;line-height:1.6}.auth-actions{display:grid;gap:10px}.btn-primary,.btn-secondary{width:100%;padding:15px;border:0;border-radius:var(--radius-sm);font:900 16px Nunito,system-ui,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}.btn-primary{background:var(--terra);color:#fff}.btn-secondary{background:#fff;color:var(--terra);border:2px solid var(--warm)}.btn-primary:disabled{opacity:.55}.setup-steps{list-style:none;margin:16px 0 24px;text-align:left}.setup-steps li{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;font-size:13px;line-height:1.5}.step-num{background:var(--terra);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}.form-input,.form-textarea,.config-input{width:100%;padding:12px 14px;border:2px solid var(--warm);border-radius:var(--radius-sm);font:15px Nunito,system-ui,sans-serif;color:var(--deep);background:var(--cream);outline:none}.form-input:focus,.form-textarea:focus,.config-input:focus{border-color:var(--terra)}.form-textarea{resize:none;height:80px}.setup-note{margin-top:18px;font-size:12px;color:var(--poop-brown);opacity:.7;line-height:1.5}
+    #login-screen,#setup-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100dvh;padding:32px 24px;background:linear-gradient(160deg,#fdf6e8 0%,#f9e4b7 60%,#f4c88e 100%);position:relative;overflow:hidden}.login-logo{font-family:Georgia,serif;font-size:52px;font-weight:700;color:var(--terra);letter-spacing:-1px;margin-bottom:4px;position:relative;z-index:1}.login-tagline{font-size:15px;color:var(--poop-brown);opacity:.75;margin-bottom:48px}.login-card,.setup-card{background:rgba(255,255,255,.9);backdrop-filter:blur(16px);border-radius:28px;padding:32px 24px;width:100%;max-width:420px;box-shadow:var(--shadow-lg);text-align:center}.login-card h2,.setup-card h2{font-family:Georgia,serif;font-size:22px;margin-bottom:8px}.login-card p,.setup-card p{font-size:13px;color:var(--poop-brown);opacity:.85;margin-bottom:20px;line-height:1.6}.auth-actions{display:grid;gap:10px}.btn-primary,.btn-secondary{width:100%;padding:15px;border:0;border-radius:var(--radius-sm);font:900 16px Nunito,system-ui,sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}.btn-primary{background:var(--terra);color:#fff}.btn-secondary{background:#fff;color:var(--terra);border:2px solid var(--warm)}.btn-primary:disabled{opacity:.55}.setup-steps{list-style:none;margin:16px 0 24px;text-align:left}.setup-steps li{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;font-size:13px;line-height:1.5}.step-num{background:var(--terra);color:white;width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0}.form-input,.form-textarea,.config-input{width:100%;padding:12px 14px;border:2px solid var(--warm);border-radius:var(--radius-sm);font:15px Nunito,system-ui,sans-serif;color:var(--deep);background:var(--cream);outline:none}.form-input:focus,.form-textarea:focus,.config-input:focus{border-color:var(--terra)}.form-textarea{resize:none;height:80px}.setup-field{margin-top:10px;text-align:left}.setup-field label{display:block;font-size:12px;font-weight:900;color:var(--poop-brown);margin-bottom:5px}.setup-note{margin-top:18px;font-size:12px;color:var(--poop-brown);opacity:.7;line-height:1.5}
     #app{display:none;flex-direction:column;min-height:100dvh}.syncing-bar{background:var(--sage-light);text-align:center;font-size:12px;padding:5px;color:var(--sage);font-weight:800}.status-bar{background:#fff8e8;border-bottom:1px solid var(--warm);padding:8px 16px;font-size:12px;color:var(--poop-brown);display:flex;justify-content:space-between;gap:12px}.sync-alert{display:none;background:#fff;border:2px solid var(--warm);border-radius:14px;margin:10px 16px 0;padding:12px;color:var(--deep);box-shadow:var(--shadow);font-size:13px;line-height:1.45}.sync-alert.show{display:block}.sync-alert strong{color:var(--terra)}.sync-alert a{color:var(--terra);font-weight:800}.app-header{background:linear-gradient(90deg,var(--terra),#c06040);color:#fff;padding:16px 20px 12px;padding-top:max(16px,env(safe-area-inset-top));display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(212,132,90,.3)}.header-logo{font-family:Georgia,serif;font-size:24px;font-weight:700}.header-user{display:flex;align-items:center;gap:8px}.header-avatar{width:32px;height:32px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:var(--peach);object-fit:cover}.header-name{font-size:13px;font-weight:700;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.btn-logout{background:rgba(255,255,255,.2);border:0;color:white;font-size:11px;padding:4px 10px;border-radius:20px;cursor:pointer;font-weight:800}.tab-bar{display:flex;background:#fff;border-bottom:2px solid var(--warm);position:sticky;top:60px;z-index:99}.tab-btn{flex:1;padding:12px 8px;border:0;background:none;font-size:13px;font-weight:800;color:var(--poop-brown);opacity:.5;cursor:pointer}.tab-btn.active{opacity:1;color:var(--terra);border-bottom:3px solid var(--terra);margin-bottom:-2px}.tab-icon{display:block;font-size:20px}.tab-content{display:none;flex:1;overflow-y:auto;padding:20px 16px 100px}.tab-content.active{display:block}.section-title{font-family:Georgia,serif;font-size:20px;margin-bottom:16px}.quick-grid,.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px}.quick-card{border:0;border-radius:var(--radius);padding:20px 16px;cursor:pointer;display:flex;flex-direction:column;align-items:flex-start;gap:6px;box-shadow:var(--shadow);font-family:inherit}.quick-card:active{transform:scale(.96)}.quick-card.feeding{background:linear-gradient(135deg,#fff5e0,#fce8c4)}.quick-card.poop{background:linear-gradient(135deg,#f5e8d0,#e8d4b0)}.quick-card.bottle{background:linear-gradient(135deg,#e8f4f8,#cce8f4)}.quick-card.note{background:linear-gradient(135deg,#f0e8f8,#e4d4f0)}.qc-icon{font-size:32px}.qc-label{font-size:14px;font-weight:800}.qc-sub{font-size:11px;color:var(--poop-brown);opacity:.7}.stat-card{background:#fff;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}.stat-val{font-family:Georgia,serif;font-size:32px;color:var(--terra);line-height:1}.stat-label{font-size:12px;color:var(--poop-brown);opacity:.75;margin-top:4px}
     .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(61,43,31,.45);z-index:200;align-items:flex-end;justify-content:center}.modal-backdrop.open{display:flex}.modal{background:#fff;border-radius:28px 28px 0 0;padding:28px 20px 40px;width:100%;max-width:480px;max-height:85dvh;overflow-y:auto;animation:slideUp .25s ease-out}@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}.modal-handle{width:40px;height:4px;background:var(--warm);border-radius:2px;margin:0 auto 20px}.modal-title{font-family:Georgia,serif;font-size:22px;margin-bottom:20px}.form-group{margin-bottom:16px}.form-label{display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--poop-brown);margin-bottom:6px}.chip-group{display:flex;flex-wrap:wrap;gap:8px}.chip{padding:8px 14px;border:2px solid var(--warm);border-radius:20px;font-size:13px;font-weight:800;color:var(--poop-brown);background:#fff;cursor:pointer}.chip.selected{background:var(--terra);border-color:var(--terra);color:#fff}.spinner{width:20px;height:20px;border:2px solid rgba(255,255,255,.35);border-top-color:white;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
     .timeline{list-style:none;position:relative}.timeline::before{content:"";position:absolute;left:22px;top:0;bottom:0;width:2px;background:var(--warm)}.timeline-item{display:flex;gap:14px;margin-bottom:16px;position:relative}.tl-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative;z-index:1;box-shadow:0 2px 8px rgba(0,0,0,.1)}.tl-dot.feed{background:#fce8c4}.tl-dot.poop{background:#e8d4b0}.tl-dot.bottle{background:#cce8f4}.tl-dot.note{background:#e4d4f0}.tl-body{background:#fff;border-radius:var(--radius-sm);padding:12px 14px;flex:1;box-shadow:var(--shadow)}.tl-header{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:4px}.tl-type{font-size:13px;font-weight:800;color:var(--terra)}.tl-time{font-size:11px;color:var(--poop-brown);opacity:.65}.tl-detail{font-size:13px;line-height:1.5}.tl-by{font-size:11px;color:var(--poop-brown);opacity:.55;margin-top:4px}.tl-delete{background:none;border:0;color:#d46b6b;font-size:16px;cursor:pointer;padding:2px 4px}.empty-state{text-align:center;padding:60px 20px;opacity:.55}.empty-state .es-icon{font-size:48px;margin-bottom:12px}.date-header{font-family:Georgia,serif;font-size:15px;color:var(--poop-brown);opacity:.65;margin:16px 0 10px 52px}.toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--deep);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:800;opacity:0;transition:all .25s;z-index:999;white-space:nowrap}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}.danger{color:#b84c4c}.small{font-size:12px;color:var(--poop-brown);opacity:.75;line-height:1.5}.row-actions{display:flex;gap:8px;margin-top:12px}.row-actions button{flex:1}.fab{position:fixed;bottom:24px;right:20px;width:58px;height:58px;border-radius:50%;background:var(--terra);color:#fff;border:0;font-size:28px;box-shadow:0 6px 20px rgba(212,132,90,.45);cursor:pointer;z-index:150}
@@ -38,10 +38,12 @@
     <p>Optional: paste a Google Sheet ID to sync across devices. BabyLog will create the tabs and headers it needs.</p>
     <ol class="setup-steps">
       <li><span class="step-num">1</span><span>Create or open a Google Sheet. Copy the ID from <strong>docs.google.com/spreadsheets/d/THIS_PART/edit</strong>.</span></li>
-      <li><span class="step-num">2</span><span>Share the sheet with edit access for every caregiver who will sign in.</span></li>
-      <li><span class="step-num">3</span><span>Paste the ID below. If you skip this, local storage still works.</span></li>
+      <li><span class="step-num">2</span><span>In Google Drive sharing, keep the sheet <strong>Restricted</strong> and give edit access only to your Google account and your wife’s Google account.</span></li>
+      <li><span class="step-num">3</span><span>Paste the ID and both caregiver emails below. The same Sheet ID on your wife’s phone will use the same database.</span></li>
     </ol>
     <input class="config-input" id="sheet-id-input" placeholder="Google Sheet ID" autocomplete="off" />
+    <div class="setup-field"><label for="caregiver-email-1">Your Google email</label><input class="config-input" id="caregiver-email-1" placeholder="you@gmail.com" autocomplete="email" /></div>
+    <div class="setup-field"><label for="caregiver-email-2">Wife’s Google email</label><input class="config-input" id="caregiver-email-2" placeholder="wife@gmail.com" autocomplete="email" /></div>
     <div class="row-actions">
       <button class="btn-secondary" onclick="showApp()">Skip for now</button>
       <button class="btn-primary" id="save-sheet-btn" onclick="saveSheetId()">💾 Save & Continue</button>
@@ -89,15 +91,17 @@
 <script>
 const CLIENT_ID = '270629967955-1ab76mpk3qosk3hdr6879t2be5i9kubb.apps.googleusercontent.com';
 const SCOPES = 'openid email profile https://www.googleapis.com/auth/spreadsheets';
-const SHEETS = { feedings: 'Feedings', diapers: 'Diapers', notes: 'Notes' };
+const SHEETS = { feedings: 'Feedings', diapers: 'Diapers', notes: 'Notes', settings: 'Settings' };
 const HEADERS = {
   feedings: ['Timestamp','Type','Side','Duration (min)','Amount (ml)','Content','Notes','LoggedBy','EventId'],
   diapers: ['Timestamp','Type','Texture','Color','Notes','LoggedBy','EventId'],
-  notes: ['Timestamp','Category','Note','LoggedBy','EventId']
+  notes: ['Timestamp','Category','Note','LoggedBy','EventId'],
+  settings: ['Key','Value']
 };
 const STORAGE_KEY = 'babylog_events_v2';
 const SHEET_ID_KEY = 'babylog_sheet_id';
 const USER_KEY = 'babylog_user_v1';
+const CAREGIVER_EMAILS_KEY = 'babylog_authorized_caregiver_emails_v1';
 const TOKEN_EXPIRES_KEY = 'babylog_google_token_expires_at';
 const TOKEN_EXPIRY_SAFETY_MS = 60000;
 
@@ -110,6 +114,7 @@ const savedSheetId = localStorage.getItem(SHEET_ID_KEY) || '';
 let sheetId = normalizeSheetId(savedSheetId);
 if (savedSheetId && savedSheetId !== sheetId) localStorage.setItem(SHEET_ID_KEY, sheetId);
 let events = readEvents();
+let authorizedCaregiverEmails = readCaregiverEmails();
 
 window.addEventListener('load', async () => {
   renderUser();
@@ -192,7 +197,7 @@ async function refreshGoogleProfile() {
 }
 function continueOffline() { currentUser = { name: 'Offline caregiver', email: '', picture: '', googleSignedIn: false }; saveJson(USER_KEY, currentUser); renderUser(); showApp(); }
 function renderUser() { document.getElementById('user-name').textContent = (currentUser.name || 'Offline').split(' ')[0]; document.getElementById('user-avatar').src = currentUser.picture || ''; }
-function showSetup() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('app').style.display = 'none'; document.getElementById('setup-screen').classList.remove('hidden'); document.getElementById('setup-screen').style.display = 'flex'; document.getElementById('sheet-id-input').value = sheetId; }
+function showSetup() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('app').style.display = 'none'; document.getElementById('setup-screen').classList.remove('hidden'); document.getElementById('setup-screen').style.display = 'flex'; document.getElementById('sheet-id-input').value = sheetId; const signedInEmail = normalizeEmail(currentUser.email); document.getElementById('caregiver-email-1').value = authorizedCaregiverEmails[0] || signedInEmail || ''; document.getElementById('caregiver-email-2').value = signedInEmail ? (authorizedCaregiverEmails.find(e => e !== signedInEmail) || authorizedCaregiverEmails[1] || '') : (authorizedCaregiverEmails[1] || ''); }
 async function showApp() { document.getElementById('login-screen').classList.add('hidden'); document.getElementById('setup-screen').classList.add('hidden'); document.getElementById('app').style.display = 'flex'; ['bf-datetime','bt-datetime','dp-datetime','nt-datetime'].forEach(setNow); await loadAllData(); }
 function signOut() { accessToken = null; localStorage.removeItem(TOKEN_EXPIRES_KEY); currentUser = { name: 'Offline caregiver', email: '', picture: '', googleSignedIn: false }; localStorage.setItem(USER_KEY, JSON.stringify(currentUser)); document.getElementById('app').style.display = 'none'; document.getElementById('login-screen').classList.remove('hidden'); showToast('Signed out. Local data remains saved.'); }
 
@@ -204,7 +209,15 @@ async function saveSheetId() {
   const btn = document.getElementById('save-sheet-btn'); setButtonBusy(btn, true);
   try {
     await ensureGoogleToken({ interactive: !currentUser.googleSignedIn });
-    await initSheet(); clearSyncProblem(); showToast('Sheet ready! ✅'); await showApp(); await syncPendingEvents();
+    await initSheet();
+    const remoteCaregivers = await loadAuthorizedCaregivers();
+    const setupCaregivers = collectCaregiverEmailsFromSetup();
+    const caregivers = remoteCaregivers.length && setupCaregivers.length < 2 ? remoteCaregivers : uniqueEmails([...setupCaregivers, currentUser.email]);
+    if (!remoteCaregivers.length && caregivers.length < 2) throw new Error('Add both your Google email and your wife’s Google email.');
+    saveCaregiverEmails(caregivers);
+    await assertAuthorizedCaregiver();
+    if (!remoteCaregivers.length || setupCaregivers.length >= 2) await saveAuthorizedCaregivers(caregivers);
+    clearSyncProblem(); showToast('Private family sheet ready! ✅'); await showApp(); await syncPendingEvents();
   }
   catch (e) {
     console.error(e);
@@ -227,6 +240,7 @@ async function sheetsRequest(path, options = {}) {
 async function sheetsGet(range) { return sheetsRequest(`/values/${encodeURIComponent(range)}`); }
 async function sheetsUpdate(range, values) { return sheetsRequest(`/values/${encodeURIComponent(range)}?valueInputOption=USER_ENTERED`, { method: 'PUT', body: JSON.stringify({ values }) }); }
 async function sheetsAppend(sheetName, values) { return sheetsRequest(`/values/${encodeURIComponent(sheetName + '!A1')}:append?valueInputOption=USER_ENTERED&insertDataOption=INSERT_ROWS`, { method: 'POST', body: JSON.stringify({ values }) }); }
+async function sheetsClear(range) { return sheetsRequest(`/values/${encodeURIComponent(range)}:clear`, { method: 'POST', body: '{}' }); }
 async function initSheet() {
   const metadata = await sheetsRequest('');
   const existing = new Set((metadata.sheets || []).map(s => s.properties.title));
@@ -236,7 +250,25 @@ async function initSheet() {
   }
   for (const [key, name] of Object.entries(SHEETS)) {
     const res = await sheetsGet(`${name}!A1:Z1`).catch(() => ({}));
-    if (!res.values || !res.values[0] || res.values[0][0] !== 'Timestamp') await sheetsUpdate(`${name}!A1:${columnName(HEADERS[key].length)}1`, [HEADERS[key]]);
+    if (!res.values || !res.values[0] || res.values[0][0] !== HEADERS[key][0]) await sheetsUpdate(`${name}!A1:${columnName(HEADERS[key].length)}1`, [HEADERS[key]]);
+  }
+}
+async function loadAuthorizedCaregivers() {
+  const res = await sheetsGet(`${SHEETS.settings}!A2:B`).catch(() => ({}));
+  return uniqueEmails((res.values || []).filter(r => r[0] === 'authorizedEmail').map(r => r[1]));
+}
+async function saveAuthorizedCaregivers(emails) {
+  const caregivers = uniqueEmails(emails);
+  await sheetsClear(`${SHEETS.settings}!A1:B100`);
+  await sheetsUpdate(`${SHEETS.settings}!A1:B${caregivers.length + 1}`, [HEADERS.settings, ...caregivers.map(email => ['authorizedEmail', email])]);
+}
+async function assertAuthorizedCaregiver() {
+  const remoteCaregivers = await loadAuthorizedCaregivers();
+  if (remoteCaregivers.length) saveCaregiverEmails(remoteCaregivers);
+  const caregivers = remoteCaregivers.length ? remoteCaregivers : authorizedCaregiverEmails;
+  if (!caregivers.length) throw new Error('Add both caregiver emails in Sheet setup before syncing.');
+  if (!currentUser.email || !caregivers.includes(normalizeEmail(currentUser.email))) {
+    throw new Error(`This Google account (${currentUser.email || 'unknown'}) is not authorized for this BabyLog sheet.`);
   }
 }
 async function loadAllData() {
@@ -246,6 +278,7 @@ async function loadAllData() {
     events = localEvents;
     if (sheetId && accessToken) {
       await initSheet();
+      await assertAuthorizedCaregiver();
       const [feedRes, diaperRes, noteRes] = await Promise.all([sheetsGet(`${SHEETS.feedings}!A2:I`), sheetsGet(`${SHEETS.diapers}!A2:G`), sheetsGet(`${SHEETS.notes}!A2:E`)]);
       const remote = [];
       (feedRes.values || []).forEach(r => remote.push(eventFromRow(r[1] === 'Breastfeed' ? 'breastfeed' : 'bottle', r, SHEETS.feedings)));
@@ -254,7 +287,7 @@ async function loadAllData() {
       events = mergeEvents(localEvents, remote);
       persistEvents(events);
     }
-  } catch (e) { console.error(e); showToast('Using saved local data; sync needs attention'); }
+  } catch (e) { console.error(e); showSyncProblem(e); showToast('Using saved local data; sync needs attention'); }
   finally { sortAndRender(); setSyncBar(false); updateStorageStatus(); }
 }
 async function syncPendingEvents() {
@@ -265,6 +298,7 @@ async function syncPendingEvents() {
   setSyncBar(true);
   try {
     await initSheet();
+    await assertAuthorizedCaregiver();
     const pending = events.filter(e => !e.synced);
     for (const ev of pending) {
       await sheetsAppend(ev.sheet, [rowFromEvent(ev)]);
@@ -355,7 +389,7 @@ function getChip(group) { return document.querySelector(`.chip[data-group="${gro
 function setNow(id) { const now = new Date(); now.setMinutes(now.getMinutes() - now.getTimezoneOffset()); document.getElementById(id).value = now.toISOString().slice(0,16); }
 function setSyncBar(show) { document.getElementById('sync-bar').classList.toggle('hidden', !show); }
 function setButtonBusy(btn, busy, label) { btn.disabled = busy; btn.innerHTML = busy ? '<div class="spinner"></div>' : label; }
-function updateStorageStatus() { const pending = events.filter(e => !e.synced).length; const mode = sheetId ? (accessToken ? 'Google Sheet connected' : (currentUser.googleSignedIn ? 'Restoring Google session' : 'Sheet configured; sign in to sync')) : 'Local-only mode'; document.getElementById('storage-status').textContent = pending ? `${mode} · ${pending} local entr${pending === 1 ? 'y' : 'ies'} pending sync` : `${mode} · all entries saved`; }
+function updateStorageStatus() { const pending = events.filter(e => !e.synced).length; const privacy = authorizedCaregiverEmails.length ? ` · ${authorizedCaregiverEmails.length} authorized caregivers` : ''; const mode = sheetId ? (accessToken ? `Private Google Sheet connected${privacy}` : (currentUser.googleSignedIn ? 'Restoring Google session' : 'Sheet configured; sign in to sync')) : 'Local-only mode'; document.getElementById('storage-status').textContent = pending ? `${mode} · ${pending} local entr${pending === 1 ? 'y' : 'ies'} pending sync` : `${mode} · all entries saved`; }
 function formatSyncError(error) {
   const message = typeof error === 'string' ? error : (error?.message || 'Sync failed; entries remain saved locally.');
   const lower = message.toLowerCase();
@@ -374,6 +408,12 @@ function formatSyncError(error) {
       html: `<strong>Google Sheet not found or not shared with this Google account.</strong><br>Your BabyLog entries are still saved on this device. Open <strong>Sheet setup</strong>, paste the Sheet ID from a URL like <code>docs.google.com/spreadsheets/d/SHEET_ID/edit</code>, and make sure the signed-in Google account has edit access.<br>Current Sheet ID: <code>${escapeHtml(sheetId || 'none')}</code><br><button class="btn-secondary" style="margin-top:10px" onclick="showSetup()">Open Sheet setup</button>`
     };
   }
+  if (lower.includes('not authorized') || lower.includes('caregiver emails')) {
+    return {
+      short: 'This Google account is not authorized.',
+      html: `<strong>This BabyLog sheet is private.</strong><br>${escapeHtml(message)}<br>Use one of the two Google accounts listed in Sheet setup, and make sure Google Drive sharing is restricted to only those accounts.<br><button class="btn-secondary" style="margin-top:10px" onclick="showSetup()">Open Sheet setup</button>`
+    };
+  }
   if (lower.includes('sign in with google') || lower.includes('sign in to sync') || lower.includes('interaction_required')) {
     return {
       short: 'Sign in to sync.',
@@ -385,6 +425,11 @@ function formatSyncError(error) {
 function showSyncProblem(error) { const alert = document.getElementById('sync-alert'); if (!alert) return; alert.innerHTML = formatSyncError(error).html; alert.classList.add('show'); updateStorageStatus(); }
 function clearSyncProblem() { const alert = document.getElementById('sync-alert'); if (!alert) return; alert.innerHTML = ''; alert.classList.remove('show'); }
 function normalizeSheetId(value) { const raw = String(value || '').trim(); const match = raw.match(/\/spreadsheets\/d\/([a-zA-Z0-9-_]+)/); return (match ? match[1] : raw).split(/[?#]/)[0].trim(); }
+function normalizeEmail(value) { return String(value || '').trim().toLowerCase(); }
+function uniqueEmails(values) { return [...new Set(values.map(normalizeEmail).filter(Boolean))]; }
+function collectCaregiverEmailsFromSetup() { return uniqueEmails([document.getElementById('caregiver-email-1')?.value, document.getElementById('caregiver-email-2')?.value]); }
+function readCaregiverEmails() { return uniqueEmails(readJson(CAREGIVER_EMAILS_KEY) || []); }
+function saveCaregiverEmails(emails) { authorizedCaregiverEmails = uniqueEmails(emails); saveJson(CAREGIVER_EMAILS_KEY, authorizedCaregiverEmails); }
 function isLikelySheetId(value) { return /^[a-zA-Z0-9-_]{20,}$/.test(value); }
 function showToast(msg) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(window.toastTimer); window.toastTimer = setTimeout(() => t.classList.remove('show'), 2800); }
 function escapeHtml(value) { return String(value).replace(/[&<>'"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' }[c])); }
